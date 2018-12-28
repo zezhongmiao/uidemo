@@ -21,13 +21,37 @@
                 grid-auto-rows: unset !important;
             }
         }
+
+        fieldset {
+            padding: .35em .625em .75em;
+            margin: 0 2px;
+            border: 1px solid silver;
+        }
+
+        legend {
+            padding: .5em;
+            border: 0;
+            width: auto;
+        }
     </style>
 
     <script type="text/x-template" id="c-zm-ui">
-        <div v-bind:style="uiStyle(uidata)">
+        <fieldset v-if="uidata.remark" v-bind:style="showBorder(uidata.remark)">
+            <legend >{{uidata.remark}}</legend>
+            <div v-bind:style="uiStyle(uidata)">
+                <div v-for="(item ,index) in uidata.items" v-bind:class="classObject()" v-bind:style="styleObject(item,index)">
+                    <template v-if="!item.uidata">
+                        <input v-if="item.type==='input'" v-model="item.content" v-bind:style="styleObject(item,index)" style="width:100%" />
+                        <span v-else>{{item.content}}</span>
+                    </template>
+                    <zm-grid v-else :uidata="item.uidata"></zm-grid>
+                </div>
+            </div>
+        </fieldset>
+        <div v-else v-bind:style="uiStyle(uidata)">
             <div v-for="(item ,index) in uidata.items" v-bind:class="classObject()" v-bind:style="styleObject(item,index)">
                 <template v-if="!item.uidata">
-                    <input v-if="item.type==='input'" v-bind:value="item.content" v-bind:style="styleObject(item,index)" style="width:100%" />
+                    <input v-if="item.type==='input'" v-model="item.content" v-bind:style="styleObject(item,index)" style="width:100%" />
                     <span v-else>{{item.content}}</span>
                 </template>
                 <zm-grid v-else :uidata="item.uidata"></zm-grid>
@@ -45,7 +69,10 @@
             data: function () { return {} },
             methods: {
                 classObject: function () {
-                    return "sod-col-sm-12 "; // 无用了  下面替换
+                    return '';//"sod-col-sm-12 "; // 无用了  下面替换
+                },
+                showBorder: function (remark) {
+                    return remark ? {} : { border: "none", padding: "none", margin: "none" };
                 },
                 uiStyle: function (uidata) {
                     //默认样式grid
@@ -124,11 +151,12 @@
         </div>
         <zm-grid :uidata="uidata" :redborder="1"></zm-grid>
 
-        <zm-grid :uidata="uidata" :rowMinHeight="40"></zm-grid>
+        <br />
+        <zm-grid :uidata="uidata"></zm-grid>
 
-        <zm-grid :uidata="list[1]" :rowMinHeight="40"></zm-grid>
+        <!--<zm-grid :uidata="list[1]" ></zm-grid>
 
-        <zm-grid :uidata="list[2]" :rowMinHeight="40"></zm-grid>
+        <zm-grid :uidata="list[2]" ></zm-grid>-->
 
         <div v-html="uidata" style="white-space: pre;"></div>
     </div>
@@ -136,13 +164,11 @@
         var app = new Vue({
             el: '.container',
             data: {
-                rowMinHeight: 26,
                 uidata: {},
                 list: [
                     {
-
-                        "remark": "标签11 ", "rows": 3, "cols": 5, "items": [
-                            { "content": "左右 ", gridArea: "1/1", padding: "5px", fontSize: "18px", uidata: { "display": "flex", items: [{ type: "label", width: '100px', fontSize: "14px", display: "flex", justifyContent: "center", alignItems: "center", content: "标签:" }, { type: "input", content: "内容1" }] } },
+                        "remark": "标签", "rows": 3, "cols": 5, "items": [
+                            { "content": "左右 ", gridArea: "1/1", padding: "5px", fontSize: "18px", uidata: { "display": "flex", items: [{ type: "label", width: '100px', fontSize: "14px", display: "flex", justifyContent: "center", alignItems: "center", content: "标签:" }, { type: "input", content: "标签1" }] } },
                             { "content": "左右 ", gridArea: "1/2", padding: "5px", fontSize: "18px", uidata: { "display": "flex", items: [{ type: "label", width: '100px', fontSize: "14px", display: "flex", justifyContent: "flex-end", alignItems: "center", content: "标签:" }, { type: "input", content: "内容1" }] } },
                             { "content": "左右 ", gridArea: "1/3", padding: "5px", fontSize: "18px", uidata: { "display": "flex", items: [{ type: "label", width: '100px', fontSize: "14px", display: "flex", justifyContent: "flex-start", alignItems: "flex-end", content: "标签:" }, { type: "input", content: "内容1" }] } },
                              { "content": "左右 ", gridArea: "1/4", padding: "5px", fontSize: "18px", uidata: { "display": "flex", items: [{ type: "label", width: '60%', fontSize: "14px", display: "flex", justifyContent: "flex-start", alignItems: "flex-end", content: "标签:" }, { type: "input", content: "内容1" }] } },
@@ -163,8 +189,25 @@
                             { "content": "重叠", gridArea: "3/4", padding: "10px", fontSize: "18px", background: "#ff000010" },
 
                         ]
-                    },//跨行 跨列
-                    { remark: "空行 ", "rows": 3, "cols": 3, "items": [{ "content": "123aaa", gridArea: "2/2" }] }// 空行  解决方法 最小高度26px
+                    },
+                 {
+                     "remark": "嵌套 ", "rows": 3, "cols": 5, "items": [
+                         { "content": "居中", gridArea: "1/3", padding: "5px", fontSize: "12px", display: "flex", justifyContent: "center", alignItems: "center" },
+                         { "content": "标签 左右", gridArea: "1/4", padding: "5px", fontSize: "12px", display: "flex", uidata: { "rows": 1, "cols": 1, items: [{ type: "label", content: "标签:" }] } },
+                         {
+                             gridArea: "2/3/span 2/span 3", uidata: {
+                                 remark: "嵌套 ", "rows": 4, "cols": 5, "items": [
+                         { "content": "居中", gridArea: "1/3", padding: "5px", fontSize: "12px", display: "flex", justifyContent: "center", alignItems: "center" },
+                         { "content": "标签 左右", gridArea: "1/4", padding: "5px", fontSize: "12px", display: "flex", uidata: { "rows": 1, "cols": 1, items: [{ type: "label", content: "标签:" }] } },
+                         { gridArea: "2/3/span 2/span 3", display: "flex", justifyContent: "center", alignItems: "center", uidata: {} },
+                         { "content": "重叠", gridArea: "3/4", padding: "10px", fontSize: "18px", background: "#ffff0010" },
+                                 ]
+                             }
+                         },
+                         { "content": "重叠", gridArea: "3/4", padding: "10px", fontSize: "18px", background: "#ff000010" },
+                     ]
+                 },
+                { "rows": 3, "cols": 3, "items": [{ "content": "123aaa", gridArea: "2/2" }] }// 空行  解决方法 最小高度26px
                 ]
             },
             methods: {
