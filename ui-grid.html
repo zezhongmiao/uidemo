@@ -52,6 +52,7 @@
                     var obj = { display: uidata.display || "grid" };
 
                     if (obj.display == "grid") {
+
                         obj.gridTemplateColumns = "repeat(" + uidata.cols + ", 1fr)";
                         obj.gridAutoRows = this.rowMinHeight + "px";
                         obj.gridTemplateRows = "repeat(" + uidata.rows + ", minmax(26px, auto))";
